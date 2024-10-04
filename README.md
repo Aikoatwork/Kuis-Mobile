@@ -1,3 +1,7 @@
-# kuis004
+# Kuis Praktikum Pemrograman Mobile
+Nama  : Bagas Luqman Nur Hakim
 
-A new Flutter project.
+NIM    : 124220004
+
+Plug    : SI E
+
