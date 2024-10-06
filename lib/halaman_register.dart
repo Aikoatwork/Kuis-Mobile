@@ -1,55 +1,66 @@
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'halaman_home.dart';
-import 'halaman_register.dart'; // Import halaman register
 
-class HalamanLogin extends StatefulWidget {
-  const HalamanLogin({super.key});
+class HalamanRegister extends StatefulWidget {
+  const HalamanRegister({super.key});
 
   @override
-  _HalamanLoginState createState() => _HalamanLoginState();
+  _HalamanRegisterState createState() => _HalamanRegisterState();
 }
 
-class _HalamanLoginState extends State<HalamanLogin> {
+class _HalamanRegisterState extends State<HalamanRegister> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _login() async {
+  void _register() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password tidak cocok!'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Login berhasil!'),
+          content: Text('Registrasi berhasil!'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 1, milliseconds: 500),
         ),
       );
-      Timer(const Duration(seconds: 1, milliseconds: 500), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HalamanHome()),
-        );
-      });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HalamanHome()),
+      );
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
+      if (e.code == 'weak-password') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Pengguna tidak ditemukan!'),
+            content: Text('Password terlalu lemah!'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
         );
-      } else if (e.code == 'wrong-password') {
+      } else if (e.code == 'email-already-in-use') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Password salah!'),
+            content: Text('Email sudah digunakan!'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -62,7 +73,7 @@ class _HalamanLoginState extends State<HalamanLogin> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Halaman Login'),
+        title: const Text('Halaman Register'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -71,11 +82,6 @@ class _HalamanLoginState extends State<HalamanLogin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image.asset(
-                'assets/upnLogo.png',
-                height: 150,
-              ),
-              const SizedBox(height: 20),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -103,19 +109,28 @@ class _HalamanLoginState extends State<HalamanLogin> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                child: const Text('Login'),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Konfirmasi Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
+                ),
               ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HalamanRegister()),
-                  );
-                },
-                child: const Text('Belum punya akun? Daftar di sini'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _register,
+                child: const Text('Register'),
               ),
             ],
           ),

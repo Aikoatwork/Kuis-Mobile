@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'daftar_barang_dummy.dart';
 import 'halaman_bantuan.dart';
+import 'halaman_login.dart'; // Import halaman login untuk kembali setelah logout
 
 class HalamanHome extends StatelessWidget {
   const HalamanHome({super.key});
+
+  void _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HalamanLogin()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +21,12 @@ class HalamanHome extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: const Text('Home Page'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context), // Panggil fungsi logout
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
